@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StatBet AI - Pronósticos L7 y Player Props</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            green: '#10b981',
+                            accent: '#8b5cf6',
+                            gold: '#f59e0b',
+                            darkBg: '#0b0f17',
+                            cardBg: '#131b2e',
+                            border: '#1f293d'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js for stats charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f17;
+            color: #f3f4f6;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0b0f17; }
+        ::-webkit-scrollbar-thumb { background: #1f293d; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #374151; }
+        .glow-effect { box-shadow: 0 0 20px -5px rgba(59, 130, 246, 0.3); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased bg-brand-darkBg text-gray-100 selection:bg-brand-500 selection:text-white">
+
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-40 bg-brand-cardBg/90 backdrop-blur-md border-b border-brand-border px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-brand-accent to-brand-green flex items-center justify-center text-white font-extrabold text-xl shadow-lg">
+                    <i class="fa-solid fa-crosshairs"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-black tracking-wider bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent">STATBET AI</span>
+                    <span class="text-xs font-semibold px-2 py-0.5 ml-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full">Motor L7 Props</span>
+                </div>
+            </div>
+
+            <!-- Main Sports Switcher -->
+            <div class="flex items-center bg-brand-darkBg p-1 rounded-xl border border-brand-border">
+                <button id="btn-football" onclick="setSport('football')" class="sport-tab-btn px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-brand-600 text-white shadow-md">
+                    <i class="fa-solid fa-futbol"></i>
+                    <span>Fútbol</span>
+                </button>
+                <button id="btn-basketball" onclick="setSport('basketball')" class="sport-tab-btn px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-basketball"></i>
+                    <span>Basket</span>
+                </button>
+            </div>
+
+            <div class="hidden md:flex items-center gap-4 text-xs font-medium">
+                <button onclick="openSettingsModal()" class="flex items-center gap-2 bg-brand-darkBg text-gray-300 hover:text-white border border-brand-border px-3 py-1.5 rounded-lg transition hover:bg-gray-800 shadow-sm">
+                    <i class="fa-solid fa-database text-gray-400"></i> Conectar API
+                </button>
+                <div class="flex items-center gap-2 bg-indigo-950/40 text-indigo-400 border border-indigo-800/40 px-3 py-1.5 rounded-lg">
+                    <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+                    <span>Análisis de 7 Partidos Activo</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- LEFT COLUMN: Filters, Matches & Analysis (8 Cols) -->
+        <section class="lg:col-span-8 flex flex-col gap-6">
+
+            <!-- League Bar & Top Controls -->
+            <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-4 shadow-xl">
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+                    <h2 class="text-lg font-bold flex items-center gap-2 text-white">
+                        <i class="fa-solid fa-earth-americas text-brand-500"></i>
+                        <span>Mercados Globales</span>
+                    </h2>
+                    <span id="match-count-badge" class="text-xs bg-brand-border text-gray-300 px-2.5 py-1 rounded-full font-medium">Cargando...</span>
+                </div>
+                <div id="league-pills-container" class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+
+            <!-- Matches Feed -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-md font-bold text-gray-300 uppercase tracking-wider text-xs flex items-center gap-2">
+                        <i class="fa-solid fa-list-ul text-amber-400"></i> Cartelera y Pronósticos L7 <span id="current-date-display" class="text-brand-400 font-black ml-1"></span>
+                    </h3>
+                </div>
+
+                <div id="matches-list" class="space-y-5">
+                    <!-- Matches populated by JavaScript -->
+                </div>
+            </div>
+
+        </section>
+
+        <!-- RIGHT COLUMN: Parlay Ticket (4 Cols) -->
+        <section class="lg:col-span-4 flex flex-col gap-6">
+
+            <!-- Picks Ticket Box -->
+            <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-5 shadow-2xl sticky top-20 flex flex-col justify-between">
+                <div>
+                    <!-- Ticket Header -->
+                    <div class="flex items-center justify-between border-b border-brand-border pb-4 mb-4">
+                        <div class="flex items-center gap-2">
+                            <div class="p-2 bg-brand-500/20 border border-brand-500/30 rounded-lg text-brand-500">
+                                <i class="fa-solid fa-receipt text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-black text-white text-base leading-tight">Mis Pronósticos</h3>
+                                <p class="text-xs text-gray-400"><span id="ticket-count">0</span> selecciones</p>
+                            </div>
+                        </div>
+                        <button onclick="clearParlayTicket()" class="text-xs text-red-400 hover:text-red-300 transition flex items-center gap-1 font-medium bg-red-500/10 hover:bg-red-500/20 px-2 py-1 rounded-md">
+                            <i class="fa-solid fa-trash-can"></i> Limpiar
+                        </button>
+                    </div>
+
+                    <!-- Selected Bets Container -->
+                    <div id="ticket-items" class="space-y-3 max-h-[450px] overflow-y-auto pr-1">
+                        <!-- Empty State -->
+                        <div id="ticket-empty-state" class="py-12 text-center text-gray-500">
+                            <i class="fa-solid fa-magnifying-glass-chart text-4xl mb-3 opacity-30"></i>
+                            <p class="text-sm font-medium text-gray-400">Sin pronósticos seleccionados</p>
+                            <p class="text-[11px] text-gray-500 mt-2 max-w-[220px] mx-auto">Revisa el análisis de los últimos 7 partidos y selecciona tus picks favoritos.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calculation Section -->
+                <div class="mt-6 border-t border-brand-border pt-4 space-y-3 bg-brand-darkBg p-4 rounded-xl">
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-gray-400 font-medium">Cuota Total Combinada:</span>
+                        <span id="ticket-total-odds" class="text-xl font-black text-white">1.00</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-400">Stake Promedio Recomendado:</span>
+                        <span id="ticket-avg-stake" class="font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">0/10</span>
+                    </div>
+
+                    <!-- Copy / Export Action -->
+                    <button onclick="copyParlayToClipboard()" class="w-full mt-3 py-3 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 font-bold text-white text-sm rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+                        <i class="fa-regular fa-copy"></i>
+                        <span>Copiar Picks para Apostar</span>
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Modal de Configuración API (Oculto por defecto) -->
+    <div id="settings-modal" class="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-brand-cardBg border border-brand-border rounded-2xl w-full max-w-md p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-lg font-black text-white flex items-center gap-2">
+                    <i class="fa-solid fa-key text-brand-500"></i> Conectar API de Datos
+                </h3>
+                <button onclick="closeSettingsModal()" class="text-gray-400 hover:text-white bg-brand-darkBg w-8 h-8 rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <p class="text-[13px] text-gray-400 mb-4 leading-relaxed">
+                Para obtener los mercados de <strong class="text-white">Player Props</strong> y estadísticas de todas las ligas en tiempo real, ingresa tu clave API. 
+                Recomendamos <em>API-Sports</em> o <em>The Odds API</em>.
+            </p>
+            <div class="mb-5">
+                <input type="password" id="api-key-input" placeholder="Tu API Key secreta..." class="w-full bg-brand-darkBg border border-brand-border rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-brand-500">
+            </div>
+            <button onclick="saveApiKey()" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-xl transition">
+                Guardar Conexión
+            </button>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-brand-cardBg border border-brand-500/50 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toast-message" class="text-sm font-medium">Notificación</span>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let currentSport = 'football';
+        let currentLeague = 'all';
+        let selectedTicketPicks = [];
+
+        // Generar Fechas
+        const todayDate = new Date();
+        const formatTime = (date) => new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: 'short' }).format(date);
+        const strHoy = `Hoy, ${formatTime(todayDate)}`;
+
+        // ==========================================
+        // BASE DE DATOS MOCK CON REQUISITOS L7 Y MERCADOS ESPECÍFICOS
+        // ==========================================
+        const mockDatabase = {
+            football: {
+                leagues: [
+                    { id: 'all', name: 'Todas las Ligas' },
+                    { id: 'premier', name: 'Premier League' },
+                    { id: 'laliga', name: 'LaLiga' }
+                ],
+                matches: [
+                    {
+                        id: 'f1',
+                        leagueId: 'premier',
+                        leagueName: 'Premier League',
+                        team1: { name: 'Arsenal', form: ['W', 'W', 'W', 'D', 'W', 'L', 'W'] }, // 7 partidos
+                        team2: { name: 'Chelsea', form: ['L', 'W', 'D', 'D', 'W', 'L', 'W'] },
+                        date: `${strHoy} - 16:30`,
+                        statsL7: "Arsenal promedia 7.5 córners a favor L7. Chelsea 3.2 tarjetas amarillas L7.",
+                        markets: [
+                            { id: 'f1_1', title: 'Arsenal (1)', type: '1X2', odds: 1.85, prob: '65%', stake: 7, isBest: true },
+                            { id: 'f1_2', title: 'Arsenal o Empate (1X)', type: 'Doble Oportunidad', odds: 1.25, prob: '85%', stake: 9, isBest: false },
+                            { id: 'f1_3', title: 'Más de 9.5 Córners', type: 'Córners Total', odds: 1.70, prob: '70%', stake: 6, isBest: false },
+                            { id: 'f1_4', title: 'Ambos Marcan - Sí', type: 'BTTS', odds: 1.65, prob: '68%', stake: 6, isBest: false },
+                            { id: 'f1_5', title: 'Chelsea +1.5', type: 'Hándicap Asiático', odds: 1.55, prob: '75%', stake: 8, isBest: false }
+                        ]
+                    },
+                    {
+                        id: 'f2',
+                        leagueId: 'laliga',
+                        leagueName: 'LaLiga EA Sports',
+                        team1: { name: 'Real Madrid', form: ['W', 'W', 'D', 'W', 'W', 'W', 'W'] },
+                        team2: { name: 'Valencia', form: ['L', 'D', 'L', 'L', 'W', 'L', 'D'] },
+                        date: `${strHoy} - 21:00`,
+                        statsL7: "R. Madrid superó los 2.5 goles en 5 de sus últimos 7 juegos. Valencia promedia 4.1 tarjetas.",
+                        markets: [
+                            { id: 'f2_1', title: 'Más de 2.5 Goles', type: 'Total Goles (O/U)', odds: 1.60, prob: '78%', stake: 8, isBest: true },
+                            { id: 'f2_2', title: 'Real Madrid -1.5', type: 'Hándicap Europeo', odds: 2.10, prob: '55%', stake: 4, isBest: false },
+                            { id: 'f2_3', title: 'Más de 4.5 Tarjetas', type: 'Tarjetas Total', odds: 1.80, prob: '62%', stake: 5, isBest: false },
+                            { id: 'f2_4', title: 'Real Madrid (1)', type: '1X2', odds: 1.30, prob: '88%', stake: 10, isBest: false }
+                        ]
+                    }
+                ]
+            },
+            basketball: {
+                leagues: [
+                    { id: 'all', name: 'Todas las Ligas' },
+                    { id: 'nba', name: 'NBA' }
+                ],
+                matches: [
+                    {
+                        id: 'b1',
+                        leagueId: 'nba',
+                        leagueName: 'NBA Basketball',
+                        team1: { name: 'Denver Nuggets', form: ['W', 'L', 'W', 'W', 'W', 'D', 'W'] }, // 7 partidos
+                        team2: { name: 'LA Lakers', form: ['W', 'L', 'L', 'W', 'W', 'L', 'L'] },
+                        date: `${strHoy} - 22:30`,
+                        statsL7: "N. Jokic promedia 28.5 Pts, 11.2 Reb, 9.8 Ast en los últimos 7 partidos.",
+                        markets: [
+                            { id: 'b1_1', title: 'Nikola Jokic +9.5 Asistencias', type: 'Player Props - Ast', odds: 1.90, prob: '75%', stake: 8, isBest: true },
+                            { id: 'b1_2', title: 'Denver Nuggets (ML)', type: 'Resultado', odds: 1.55, prob: '70%', stake: 8, isBest: false },
+                            { id: 'b1_3', title: 'Lakers +7.5', type: 'Hándicap', odds: 1.85, prob: '55%', stake: 5, isBest: false },
+                            { id: 'b1_4', title: 'Más de 224.5 Puntos', type: 'Puntos Totales (O/U)', odds: 1.90, prob: '60%', stake: 6, isBest: false },
+                            { id: 'b1_5', title: 'LeBron James -2.5 Turnovers', type: 'Player Props - TO', odds: 2.10, prob: '50%', stake: 3, isBest: false }
+                        ]
+                    },
+                    {
+                        id: 'b2',
+                        leagueId: 'nba',
+                        leagueName: 'NBA Basketball',
+                        team1: { name: 'Golden State', form: ['W', 'W', 'L', 'W', 'W', 'W', 'L'] },
+                        team2: { name: 'Dallas Mavs', form: ['W', 'W', 'W', 'L', 'W', 'D', 'W'] },
+                        date: `${strHoy} - 20:00`,
+                        statsL7: "S. Curry promedia 5.2 Triples en L7. L. Doncic promedia 31 Pts y 9 Reb en L7.",
+                        markets: [
+                            { id: 'b2_1', title: 'Stephen Curry +4.5 Triples', type: 'Player Props - 3PM', odds: 1.80, prob: '68%', stake: 7, isBest: true },
+                            { id: 'b2_2', title: 'Luka Doncic +30.5 Puntos', type: 'Player Props - Pts', odds: 1.85, prob: '65%', stake: 6, isBest: false },
+                            { id: 'b2_3', title: 'Dallas Mavs (ML)', type: 'Resultado', odds: 2.05, prob: '52%', stake: 4, isBest: false },
+                            { id: 'b2_4', title: 'Luka Doncic +8.5 Rebotes', type: 'Player Props - Reb', odds: 1.75, prob: '71%', stake: 7, isBest: false }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        window.onload = function() {
+            document.getElementById('current-date-display').innerText = `(${formatTime(todayDate)})`;
+            renderLeaguePills();
+            renderMatches();
+            updateTicketCalculations();
+        };
+
+        // Navigation & Filters
+        function setSport(sport) {
+            currentSport = sport;
+            currentLeague = 'all';
+            
+            document.getElementById('btn-football').className = sport === 'football' 
+                ? 'sport-tab-btn px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-brand-600 text-white shadow-md'
+                : 'sport-tab-btn px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 text-gray-400 hover:text-white';
+                
+            document.getElementById('btn-basketball').className = sport === 'basketball' 
+                ? 'sport-tab-btn px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 bg-brand-600 text-white shadow-md'
+                : 'sport-tab-btn px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 text-gray-400 hover:text-white';
+
+            renderLeaguePills();
+            renderMatches();
+        }
+
+        function setLeague(leagueId) {
+            currentLeague = leagueId;
+            renderLeaguePills();
+            renderMatches();
+        }
+
+        function renderLeaguePills() {
+            const container = document.getElementById('league-pills-container');
+            const leagues = mockDatabase[currentSport].leagues;
+            container.innerHTML = leagues.map(l => {
+                const isActive = l.id === currentLeague;
+                const css = isActive ? 'bg-brand-500 text-white border-brand-500 shadow-md' : 'bg-brand-darkBg text-gray-400 border-brand-border hover:text-white';
+                return `<button onclick="setLeague('${l.id}')" class="px-4 py-1.5 rounded-xl border text-[11px] font-bold tracking-wide transition-all ${css}">${l.name}</button>`;
+            }).join('');
+        }
+
+        // Render Matches & L7 Forms
+        function renderMatches() {
+            const container = document.getElementById('matches-list');
+            let matches = mockDatabase[currentSport].matches;
+            if (currentLeague !== 'all') matches = matches.filter(m => m.leagueId === currentLeague);
+            
+            document.getElementById('match-count-badge').innerText = `${matches.length} partidos`;
+
+            container.innerHTML = matches.map(match => {
+                // Render Form (7 matches)
+                const renderForm = (formArray) => formArray.map(res => {
+                    let color = res === 'W' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 
+                               res === 'D' ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 
+                               'bg-red-500/20 text-red-400 border-red-500/30';
+                    return `<span class="w-4 h-4 rounded-sm flex items-center justify-center text-[9px] font-bold border ${color}">${res}</span>`;
+                }).join('');
+
+                // Render Markets
+                const marketsHTML = match.markets.map(m => {
+                    const isSelected = selectedTicketPicks.some(p => p.id === m.id);
+                    const selCss = isSelected ? 'border-brand-500 bg-brand-500/10' : 'border-brand-border bg-brand-darkBg hover:border-gray-600';
+                    const bestCss = m.isBest && !isSelected ? 'border-amber-500/50 bg-amber-500/5' : selCss;
+                    
+                    return `
+                        <button onclick="togglePick('${match.id}', '${m.id}')" class="p-2.5 rounded-xl border transition-all flex flex-col justify-between text-left relative group ${bestCss}">
+                            ${m.isBest ? '<div class="absolute -top-2 -right-2 bg-amber-500 text-brand-darkBg text-[8px] font-black px-1.5 py-0.5 rounded shadow"><i class="fa-solid fa-star"></i> TOP PICK</div>' : ''}
+                            <div class="flex justify-between items-start w-full">
+                                <span class="text-xs font-bold ${m.isBest && !isSelected ? 'text-amber-400' : 'text-gray-200'}">${m.title}</span>
+                                <span class="text-sm font-black text-white bg-slate-800 px-1.5 py-0.5 rounded ml-2">${m.odds.toFixed(2)}</span>
+                            </div>
+                            <div class="flex justify-between items-center w-full mt-2">
+                                <span class="text-[9px] text-gray-400 uppercase tracking-wide bg-brand-cardBg px-1.5 rounded">${m.type}</span>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-[9px] font-bold text-brand-400">Prob: ${m.prob}</span>
+                                    <span class="text-[9px] font-bold ${m.stake >= 7 ? 'text-emerald-400 bg-emerald-400/10' : 'text-amber-400 bg-amber-400/10'} px-1 rounded border border-current">Stake ${m.stake}/10</span>
+                                </div>
+                            </div>
+                        </button>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="bg-brand-cardBg border border-brand-border rounded-2xl p-5 shadow-xl">
+                        <!-- Match Header -->
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-[10px] font-bold px-2 py-1 bg-brand-darkBg text-gray-400 rounded-md border border-brand-border">${match.leagueName} | ${match.date}</span>
+                            <span class="text-[10px] font-medium text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded flex items-center gap-1"><i class="fa-solid fa-microchip"></i> L7 Analizado</span>
+                        </div>
+
+                        <!-- Teams & L7 -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                            <div class="flex justify-between items-center bg-brand-darkBg p-2.5 rounded-lg border border-brand-border/60">
+                                <span class="font-bold text-sm">${match.team1.name}</span>
+                                <div class="flex items-center gap-0.5">
+                                    <span class="text-[8px] text-gray-500 mr-1">L7</span>
+                                    ${renderForm(match.team1.form)}
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center bg-brand-darkBg p-2.5 rounded-lg border border-brand-border/60">
+                                <span class="font-bold text-sm">${match.team2.name}</span>
+                                <div class="flex items-center gap-0.5">
+                                    <span class="text-[8px] text-gray-500 mr-1">L7</span>
+                                    ${renderForm(match.team2.form)}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- L7 Insight -->
+                        <p class="text-[11px] text-gray-400 mb-3 pl-2 border-l-2 border-brand-500 italic">
+                            <i class="fa-solid fa-chart-simple mr-1 text-brand-500"></i> ${match.statsL7}
+                        </p>
+
+                        <!-- Markets Grid -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            ${marketsHTML}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Parlay Ticket Logic
+        function togglePick(matchId, marketId) {
+            let match = mockDatabase[currentSport].matches.find(m => m.id === matchId);
+            let market = match.markets.find(m => m.id === marketId);
+            
+            const index = selectedTicketPicks.findIndex(p => p.id === marketId);
+            if (index > -1) {
+                selectedTicketPicks.splice(index, 1);
+            } else {
+                // Prevenir picks del mismo partido
+                selectedTicketPicks = selectedTicketPicks.filter(p => p.matchId !== matchId);
+                selectedTicketPicks.push({
+                    id: market.id, matchId: matchId, 
+                    matchStr: `${match.team1.name} vs ${match.team2.name}`,
+                    pickStr: market.title, odds: market.odds, stake: market.stake
+                });
+            }
+            renderMatches();
+            renderTicket();
+            updateTicketCalculations();
+        }
+
+        function removePick(id) {
+            selectedTicketPicks = selectedTicketPicks.filter(p => p.id !== id);
+            renderMatches();
+            renderTicket();
+            updateTicketCalculations();
+        }
+
+        function clearParlayTicket() {
+            selectedTicketPicks = [];
+            renderMatches();
+            renderTicket();
+            updateTicketCalculations();
+        }
+
+        function renderTicket() {
+            const container = document.getElementById('ticket-items');
+            document.getElementById('ticket-count').innerText = selectedTicketPicks.length;
+            
+            if (selectedTicketPicks.length === 0) {
+                container.innerHTML = document.getElementById('ticket-empty-state').outerHTML;
+                document.getElementById('ticket-empty-state').style.display = 'block'; // Ensure visibility if it was hidden
+                return;
+            }
+
+            container.innerHTML = selectedTicketPicks.map(p => `
+                <div class="bg-brand-darkBg border border-brand-border p-3 rounded-xl flex justify-between items-center gap-2">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[10px] text-gray-500 truncate">${p.matchStr}</p>
+                        <p class="text-xs font-bold text-white truncate">${p.pickStr}</p>
+                        <p class="text-[10px] text-amber-400 mt-0.5">Stake recomendado: ${p.stake}/10</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-black text-sm text-white">${p.odds.toFixed(2)}</span>
+                        <button onclick="removePick('${p.id}')" class="text-gray-500 hover:text-red-400"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateTicketCalculations() {
+            if (selectedTicketPicks.length === 0) {
+                document.getElementById('ticket-total-odds').innerText = '1.00';
+                document.getElementById('ticket-avg-stake').innerText = '0/10';
+                return;
+            }
+            let odds = 1, sumStake = 0;
+            selectedTicketPicks.forEach(p => {
+                odds *= p.odds;
+                sumStake += p.stake;
+            });
+            let avgStake = Math.round(sumStake / selectedTicketPicks.length);
+            
+            document.getElementById('ticket-total-odds').innerText = odds.toFixed(2);
+            document.getElementById('ticket-avg-stake').innerText = `${avgStake}/10`;
+            document.getElementById('ticket-avg-stake').className = avgStake >= 7 
+                ? 'font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-400/20'
+                : 'font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20';
+        }
+
+        function copyParlayToClipboard() {
+            if(selectedTicketPicks.length === 0) return showToast("Selecciona al menos un pronóstico", "error");
+            
+            let text = "🎯 MIS PRONÓSTICOS L7 STATBET\n\n";
+            selectedTicketPicks.forEach(p => {
+                text += `⚽ ${p.matchStr}\n👉 ${p.pickStr} (@${p.odds.toFixed(2)}) | Stake: ${p.stake}/10\n\n`;
+            });
+            text += `📈 Cuota Total: ${document.getElementById('ticket-total-odds').innerText}\n`;
+            text += `💰 Stake Promedio: ${document.getElementById('ticket-avg-stake').innerText}\n`;
+            
+            try {
+                const el = document.createElement('textarea');
+                el.value = text;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                showToast("Picks copiados al portapapeles", "success");
+            } catch(e) {
+                showToast("Error al copiar", "error");
+            }
+        }
+
+        // Modals & Toasts
+        function openSettingsModal() { document.getElementById('settings-modal').classList.remove('hidden'); }
+        function closeSettingsModal() { document.getElementById('settings-modal').classList.add('hidden'); }
+        function saveApiKey() { closeSettingsModal(); showToast("Conexión simulada guardada.", "success"); }
+
+        function showToast(msg, type) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = msg;
+            toast.className = `fixed bottom-6 right-6 z-50 bg-brand-cardBg border border-${type==='success'?'emerald':'red'}-500/50 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-0 opacity-100`;
+            setTimeout(() => {
+                toast.classList.replace('translate-y-0', 'translate-y-20');
+                toast.classList.replace('opacity-100', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
