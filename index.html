@@ -9,12 +9,10 @@
     body { background-color: #0b0f19; color: #e2e8f0; font-family: system-ui, -apple-system, sans-serif; }
     .card { background-color: #131b2e; border: 1px solid #1e293b; }
     .badge-stake { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-    .badge-nba { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- Navbar -->
   <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-30">
     <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-2">
@@ -29,42 +27,37 @@
         <span id="apiStatusBadge" class="text-xs px-2.5 py-1 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">
           API No Conectada
         </span>
-        <button onclick="openApiModal()" class="bg-slate-800 hover:bg-slate-700 text-white text-sm px-3 py-1.5 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+        <button id="btnOpenModal" type="button" class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-white text-sm px-3 py-1.5 rounded-lg border border-slate-700 transition">
           ⚙️ Configurar API
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Main Content -->
   <main class="max-w-6xl mx-auto w-full px-4 py-6 flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6">
     
-    <!-- Left Column: Controls & Matches -->
     <div class="lg:col-span-2 space-y-4">
-      
-      <!-- Sport Selector & Date -->
       <div class="card p-4 rounded-xl flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap gap-2">
-          <button id="btnFootball" onclick="switchSport('football')" class="px-3.5 py-2 rounded-lg font-medium text-sm bg-emerald-600 text-white transition">
+          <button id="btnFootball" type="button" class="cursor-pointer px-3.5 py-2 rounded-lg font-medium text-sm bg-emerald-600 text-white transition">
             ⚽ Fútbol
           </button>
-          <button id="btnBasketball" onclick="switchSport('basketball')" class="px-3.5 py-2 rounded-lg font-medium text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+          <button id="btnBasketball" type="button" class="cursor-pointer px-3.5 py-2 rounded-lg font-medium text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
             🏀 Baloncesto General
           </button>
-          <button id="btnNba" onclick="switchSport('nba')" class="px-3.5 py-2 rounded-lg font-medium text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+          <button id="btnNba" type="button" class="cursor-pointer px-3.5 py-2 rounded-lg font-medium text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
             🇺🇸 NBA & Player Props
           </button>
         </div>
 
         <div class="flex items-center gap-2">
           <input type="date" id="matchDate" class="bg-slate-900 border border-slate-700 text-sm rounded-lg px-3 py-1.5 text-slate-200" />
-          <button onclick="fetchDailyFixtures()" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-1.5 rounded-lg transition">
+          <button id="btnLoadFixtures" type="button" class="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-1.5 rounded-lg transition">
             Cargar Partidos
           </button>
         </div>
       </div>
 
-      <!-- Market Filter Info -->
       <div id="marketTags" class="flex flex-wrap gap-1.5 text-xs text-slate-400">
         <span class="bg-slate-800/80 px-2.5 py-1 rounded border border-slate-700">1X2 / Hándicaps</span>
         <span class="bg-slate-800/80 px-2.5 py-1 rounded border border-slate-700">Córners O/U (Real L7)</span>
@@ -72,28 +65,25 @@
         <span class="bg-slate-800/80 px-2.5 py-1 rounded border border-slate-700">BTTS & Goles O/U</span>
       </div>
 
-      <!-- Status / Loading Box -->
       <div id="statusBox" class="hidden card p-4 rounded-xl text-sm text-center text-slate-300"></div>
 
-      <!-- Fixtures List -->
       <div id="fixturesContainer" class="space-y-3">
         <div class="card p-8 rounded-xl text-center space-y-2">
-          <p class="text-slate-300 font-medium">Motor L7 Actualizado (Temporada Real + Boxscores)</p>
-          <p class="text-xs text-slate-400">Selecciona deporte, elige la fecha y presiona <b>Cargar Partidos</b>.</p>
+          <p class="text-slate-300 font-medium">Motor L7 Listo</p>
+          <p class="text-xs text-slate-400">1. Haz clic en <b>⚙️ Configurar API</b> y guarda tu clave.<br>2. Selecciona deporte y presiona <b>Cargar Partidos</b>.</p>
         </div>
       </div>
     </div>
 
-    <!-- Right Column: Parlay & Stake Builder -->
     <div class="space-y-4">
       <div class="card p-4 rounded-xl sticky top-20 space-y-4">
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
           <h2 class="font-bold text-white flex items-center gap-2">🎫 Hoja de Picks L7</h2>
-          <button onclick="clearSlip()" class="text-xs text-slate-400 hover:text-red-400">Limpiar</button>
+          <button id="btnClearSlip" type="button" class="cursor-pointer text-xs text-slate-400 hover:text-red-400">Limpiar</button>
         </div>
 
         <div id="slipItems" class="space-y-2.5 max-h-80 overflow-y-auto">
-          <p class="text-xs text-slate-500 text-center py-6">Aún no has agregado picks. Analiza un partido y selecciona cualquiera de los mercados sugeridos.</p>
+          <p class="text-xs text-slate-500 text-center py-6">Aún no has agregado picks.</p>
         </div>
 
         <div class="border-t border-slate-800 pt-3 space-y-2 text-sm">
@@ -107,7 +97,7 @@
           </div>
           <div class="flex justify-between text-slate-400">
             <span>Bankroll Base ($):</span>
-            <input type="number" id="bankrollInput" value="100" oninput="renderSlip()" class="w-20 bg-slate-900 border border-slate-700 rounded px-2 py-0.5 text-right text-white" />
+            <input type="number" id="bankrollInput" value="100" class="w-20 bg-slate-900 border border-slate-700 rounded px-2 py-0.5 text-right text-white" />
           </div>
           <div class="flex justify-between text-base font-bold text-white pt-1 border-t border-slate-800/60">
             <span>Inversión Recomendada:</span>
@@ -119,23 +109,22 @@
 
   </main>
 
-  <!-- API Key Modal -->
   <div id="apiModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
     <div class="card max-w-md w-full p-6 rounded-2xl space-y-4 shadow-2xl">
       <div class="flex justify-between items-center">
         <h3 class="font-bold text-lg text-white">⚙️ Configurar API-Sports</h3>
-        <button onclick="closeApiModal()" class="text-slate-400 hover:text-white text-xl">&times;</button>
+        <button id="btnCloseModal" type="button" class="cursor-pointer text-slate-400 hover:text-white text-xl">&times;</button>
       </div>
       <p class="text-xs text-slate-400 leading-relaxed">
-        Tu <b>API-KEY</b> de API-Sports se guarda de forma segura en tu navegador.
+        Pega tu <b>API-KEY</b> de API-Sports. Se guarda en tu navegador.
       </p>
       <div>
         <label class="block text-xs font-medium text-slate-300 mb-1">Tu API Key (32 caracteres)</label>
         <input type="password" id="apiKeyInput" placeholder="Pega tu clave aquí" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" />
       </div>
       <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeApiModal()" class="px-4 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800">Cancelar</button>
-        <button onclick="saveApiKey()" class="px-4 py-2 rounded-lg text-sm font-medium bg-emerald-600 hover:bg-emerald-500 text-white">Guardar Clave</button>
+        <button id="btnCancelModal" type="button" class="cursor-pointer px-4 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800">Cancelar</button>
+        <button id="btnSaveApi" type="button" class="cursor-pointer px-4 py-2 rounded-lg text-sm font-medium bg-emerald-600 hover:bg-emerald-500 text-white">Guardar Clave</button>
       </div>
     </div>
   </div>
@@ -144,11 +133,25 @@
     let currentSport = 'football';
     let slip = [];
 
-    document.addEventListener('DOMContentLoaded', () => {
+    function initApp() {
       const today = new Date().toISOString().split('T')[0];
       document.getElementById('matchDate').value = today;
+
+      document.getElementById('btnOpenModal').addEventListener('click', openApiModal);
+      document.getElementById('btnCloseModal').addEventListener('click', closeApiModal);
+      document.getElementById('btnCancelModal').addEventListener('click', closeApiModal);
+      document.getElementById('btnSaveApi').addEventListener('click', saveApiKey);
+
+      document.getElementById('btnFootball').addEventListener('click', () => switchSport('football'));
+      document.getElementById('btnBasketball').addEventListener('click', () => switchSport('basketball'));
+      document.getElementById('btnNba').addEventListener('click', () => switchSport('nba'));
+      document.getElementById('btnLoadFixtures').addEventListener('click', fetchDailyFixtures);
+
+      document.getElementById('btnClearSlip').addEventListener('click', clearSlip);
+      document.getElementById('bankrollInput').addEventListener('input', renderSlip);
+
       checkApiStatus();
-    });
+    }
 
     function checkApiStatus() {
       const key = localStorage.getItem('apisports_key');
@@ -164,13 +167,15 @@
     }
 
     function openApiModal() {
-      document.getElementById('apiModal').classList.remove('hidden');
-      document.getElementById('apiModal').classList.add('flex');
+      const m = document.getElementById('apiModal');
+      m.classList.remove('hidden');
+      m.classList.add('flex');
     }
 
     function closeApiModal() {
-      document.getElementById('apiModal').classList.add('hidden');
-      document.getElementById('apiModal').classList.remove('flex');
+      const m = document.getElementById('apiModal');
+      m.classList.add('hidden');
+      m.classList.remove('flex');
     }
 
     function saveApiKey() {
@@ -188,12 +193,12 @@
       const btnN = document.getElementById('btnNba');
       const tags = document.getElementById('marketTags');
 
-      btnF.className = 'px-3.5 py-2 rounded-lg font-medium text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition';
-      btnB.className = 'px-3.5 py-2 rounded-lg font-medium text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition';
-      btnN.className = 'px-3.5 py-2 rounded-lg font-medium text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition';
+      btnF.className = 'cursor-pointer px-3.5 py-2 rounded-lg font-medium text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition';
+      btnB.className = 'cursor-pointer px-3.5 py-2 rounded-lg font-medium text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition';
+      btnN.className = 'cursor-pointer px-3.5 py-2 rounded-lg font-medium text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition';
 
       if (sport === 'football') {
-        btnF.className = 'px-3.5 py-2 rounded-lg font-medium text-sm bg-emerald-600 text-white transition';
+        btnF.className = 'cursor-pointer px-3.5 py-2 rounded-lg font-medium text-sm bg-emerald-600 text-white transition';
         tags.innerHTML = `
           <span class="bg-slate-800/80 px-2.5 py-1 rounded border border-slate-700">1X2 / Hándicaps</span>
           <span class="bg-slate-800/80 px-2.5 py-1 rounded border border-slate-700">Córners O/U (Real L7)</span>
@@ -201,13 +206,13 @@
           <span class="bg-slate-800/80 px-2.5 py-1 rounded border border-slate-700">BTTS & Goles O/U</span>
         `;
       } else if (sport === 'basketball') {
-        btnB.className = 'px-3.5 py-2 rounded-lg font-medium text-sm bg-amber-600 text-white transition';
+        btnB.className = 'cursor-pointer px-3.5 py-2 rounded-lg font-medium text-sm bg-amber-600 text-white transition';
         tags.innerHTML = `
           <span class="bg-slate-800/80 px-2.5 py-1 rounded border border-slate-700">Ganador & Hándicap</span>
           <span class="bg-slate-800/80 px-2.5 py-1 rounded border border-slate-700">Total Puntos O/U (L7)</span>
         `;
       } else {
-        btnN.className = 'px-3.5 py-2 rounded-lg font-medium text-sm bg-orange-600 text-white transition';
+        btnN.className = 'cursor-pointer px-3.5 py-2 rounded-lg font-medium text-sm bg-orange-600 text-white transition';
         tags.innerHTML = `
           <span class="bg-slate-800/80 px-2.5 py-1 rounded border border-slate-700">Puntos & Hándicap NBA</span>
           <span class="bg-slate-800/80 px-2.5 py-1 rounded border border-slate-700">Props: Puntos & Rebotes</span>
@@ -230,7 +235,7 @@
       if (!apiKey) return openApiModal();
 
       const date = document.getElementById('matchDate').value;
-      const cacheKey = `fixtures_v2_${currentSport}_${date}`;
+      const cacheKey = `fixtures_v3_${currentSport}_${date}`;
       const cached = sessionStorage.getItem(cacheKey);
 
       if (cached) {
@@ -287,6 +292,8 @@
           const home = item.teams.home;
           const away = item.teams.away;
           const time = new Date(item.fixture.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const hName = home.name.replace(/['"]/g, '');
+          const aName = away.name.replace(/['"]/g, '');
 
           return `
             <div class="card p-4 rounded-xl space-y-3">
@@ -306,8 +313,8 @@
                 </div>
               </div>
               <div id="analysis-${id}" class="pt-2 border-t border-slate-800/80">
-                <button onclick="analyzeFootballL7(${id}, ${home.id}, ${away.id}, ${season}, '${home.name.replace(/'/g, "")}', '${away.name.replace(/'/g, "")}')" 
-                  class="w-full py-2 rounded-lg bg-slate-800 hover:bg-emerald-600/20 hover:text-emerald-400 hover:border-emerald-500/40 border border-slate-700 text-xs font-semibold text-slate-200 transition">
+                <button type="button" onclick="analyzeFootballL7(${id}, ${home.id}, ${away.id}, ${season}, '${hName}', '${aName}')" 
+                  class="cursor-pointer w-full py-2 rounded-lg bg-slate-800 hover:bg-emerald-600/20 hover:text-emerald-400 hover:border-emerald-500/40 border border-slate-700 text-xs font-semibold text-slate-200 transition">
                   🔍 Analizar L7 Real (Goles, Córners, Tarjetas y Hándicap)
                 </button>
               </div>
@@ -320,6 +327,8 @@
           const home = item.teams.home;
           const away = item.teams.away;
           const time = item.time || 'Hoy';
+          const hName = home.name.replace(/['"]/g, '');
+          const aName = away.name.replace(/['"]/g, '');
 
           return `
             <div class="card p-4 rounded-xl space-y-3">
@@ -339,20 +348,21 @@
                 </div>
               </div>
               <div id="analysis-${id}" class="pt-2 border-t border-slate-800/80">
-                <button onclick="analyzeBasketballL7(${id}, ${home.id}, ${away.id}, '${season}', '${home.name.replace(/'/g, "")}', '${away.name.replace(/'/g, "")}')" 
-                  class="w-full py-2 rounded-lg bg-slate-800 hover:bg-amber-600/20 hover:text-amber-400 hover:border-amber-500/40 border border-slate-700 text-xs font-semibold text-slate-200 transition">
+                <button type="button" onclick="analyzeBasketballL7(${id}, ${home.id}, ${away.id}, '${season}', '${hName}', '${aName}')" 
+                  class="cursor-pointer w-full py-2 rounded-lg bg-slate-800 hover:bg-amber-600/20 hover:text-amber-400 hover:border-amber-500/40 border border-slate-700 text-xs font-semibold text-slate-200 transition">
                   🏀 Analizar L7 Baloncesto (Puntos & Hándicap)
                 </button>
               </div>
             </div>
           `;
         } else {
-          // NBA v2
           const id = item.id;
           const season = item.season || 2026;
           const home = item.teams.home;
           const away = item.teams.visitors;
           const time = new Date(item.date.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const hName = home.name.replace(/['"]/g, '');
+          const aName = away.name.replace(/['"]/g, '');
 
           return `
             <div class="card p-4 rounded-xl space-y-3">
@@ -372,8 +382,8 @@
                 </div>
               </div>
               <div id="analysis-${id}" class="pt-2 border-t border-slate-800/80">
-                <button onclick="analyzeNbaL7(${id}, ${home.id}, ${away.id}, ${season}, '${home.name.replace(/'/g, "")}', '${away.name.replace(/'/g, "")}')" 
-                  class="w-full py-2 rounded-lg bg-slate-800 hover:bg-orange-600/20 hover:text-orange-400 hover:border-orange-500/40 border border-slate-700 text-xs font-semibold text-slate-200 transition">
+                <button type="button" onclick="analyzeNbaL7(${id}, ${home.id}, ${away.id}, ${season}, '${hName}', '${aName}')" 
+                  class="cursor-pointer w-full py-2 rounded-lg bg-slate-800 hover:bg-orange-600/20 hover:text-orange-400 hover:border-orange-500/40 border border-slate-700 text-xs font-semibold text-slate-200 transition">
                   🇺🇸 Analizar NBA L7 + Player Props (Pts, Reb, Ast, 3PM, TO)
                 </button>
               </div>
@@ -383,14 +393,12 @@
       }).join('');
     }
 
-    // 1. FÚTBOL L7 REAL (Busca por temporada y status=FT + estadísticas de córners/tarjetas)
     async function analyzeFootballL7(fixtureId, homeId, awayId, season, homeName, awayName) {
       const apiKey = localStorage.getItem('apisports_key');
       const target = document.getElementById(`analysis-${fixtureId}`);
       target.innerHTML = `<p class="text-xs text-emerald-400 text-center py-2 animate-pulse">⏳ Consultando historial real de ${homeName} y ${awayName} (Temp. ${season})...</p>`;
 
       try {
-        // Consultar partidos finalizados de la temporada actual (compatible con plan Free)
         let [resH, resA] = await Promise.all([
           fetch(`https://v3.football.api-sports.io/fixtures?team=${homeId}&season=${season}&status=FT`, {
             headers: { 'x-rapidapi-key': apiKey, 'x-rapidapi-host': 'v3.football.api-sports.io' }
@@ -403,446 +411,6 @@
         let dataH = await resH.json();
         let dataA = await resA.json();
 
-        // Fallback a temporada anterior si la actual recién comienza
         if ((!dataH.response || dataH.response.length < 3) && season > 2020) {
           const prevSeason = season - 1;
-          [resH, resA] = await Promise.all([
-            fetch(`https://v3.football.api-sports.io/fixtures?team=${homeId}&season=${prevSeason}&status=FT`, {
-              headers: { 'x-rapidapi-key': apiKey, 'x-rapidapi-host': 'v3.football.api-sports.io' }
-            }),
-            fetch(`https://v3.football.api-sports.io/fixtures?team=${awayId}&season=${prevSeason}&status=FT`, {
-              headers: { 'x-rapidapi-key': apiKey, 'x-rapidapi-host': 'v3.football.api-sports.io' }
-            })
-          ]);
-          dataH = await resH.json();
-          dataA = await resA.json();
-        }
-
-        const gamesH = (dataH.response || []).sort((a, b) => b.fixture.timestamp - a.fixture.timestamp).slice(0, 7);
-        const gamesA = (dataA.response || []).sort((a, b) => b.fixture.timestamp - a.fixture.timestamp).slice(0, 7);
-
-        if (gamesH.length === 0 && gamesA.length === 0) {
-          target.innerHTML = `<div class="bg-slate-900/90 border border-amber-500/30 rounded-lg p-3 text-center text-xs text-amber-300">⚠️ Datos históricos L7 insuficientes en esta competición para generar un pronóstico fiable.</div>`;
-          return;
-        }
-
-        // Obtener estadísticas detalladas (córners y tarjetas) de los 2 partidos más recientes de cada equipo (4 peticiones ligeras)
-        const sampleIds = [
-          ...(gamesH.slice(0, 2).map(g => g.fixture.id)),
-          ...(gamesA.slice(0, 2).map(g => g.fixture.id))
-        ];
-
-        let totalCorners = 0, totalCards = 0, statsSamples = 0;
-        for (const fId of sampleIds) {
-          const stRes = await fetch(`https://v3.football.api-sports.io/fixtures/statistics?fixture=${fId}`, {
-            headers: { 'x-rapidapi-key': apiKey, 'x-rapidapi-host': 'v3.football.api-sports.io' }
-          });
-          const stData = await stRes.json();
-          if (stData.response && stData.response.length === 2) {
-            stData.response.forEach(teamStat => {
-              const cornersObj = teamStat.statistics.find(s => s.type === 'Corner Kicks');
-              const yellowObj = teamStat.statistics.find(s => s.type === 'Yellow Cards');
-              const redObj = teamStat.statistics.find(s => s.type === 'Red Cards');
-              totalCorners += (cornersObj && cornersObj.value ? Number(cornersObj.value) : 0);
-              totalCards += (yellowObj && yellowObj.value ? Number(yellowObj.value) : 0) + (redObj && redObj.value ? Number(redObj.value) : 0);
-            });
-            statsSamples++;
-          }
-        }
-
-        const avgCorners = statsSamples > 0 ? (totalCorners / statsSamples).toFixed(1) : 'N/D';
-        const avgCards = statsSamples > 0 ? (totalCards / statsSamples).toFixed(1) : 'N/D';
-
-        const statsH = calcFootballMetrics(gamesH, homeId);
-        const statsA = calcFootballMetrics(gamesA, awayId);
-        const totalGamesAnalysed = gamesH.length + gamesA.length;
-
-        const avgTotalGoals = ((statsH.goalsFor + statsH.goalsAgainst + statsA.goalsFor + statsA.goalsAgainst) / 2).toFixed(2);
-        const bttsRate = Math.round(((statsH.bttsCount + statsA.bttsCount) / totalGamesAnalysed) * 100);
-
-        // Generar múltiples mercados L7
-        const picks = [];
-
-        // 1. Mercado Principal (Goles / 1X2 / Hándicap)
-        if (avgTotalGoals >= 2.75 && bttsRate >= 58) {
-          picks.push({
-            market: 'Goles O/U',
-            selection: 'Más de 2.5 Goles (Over 2.5)',
-            stake: avgTotalGoals >= 3.2 ? 8 : 7,
-            reason: `Media L7 de ${avgTotalGoals} goles y ${bttsRate}% de ambos marcan.`
-          });
-        } else if (statsH.wins >= 5 && statsA.losses >= 4) {
-          picks.push({
-            market: 'Resultado 1X2',
-            selection: `Gana ${homeName} (1)`,
-            stake: 8,
-            reason: `${homeName} ganó ${statsH.wins}/${gamesH.length} juegos recientes.`
-          });
-        } else if (avgTotalGoals <= 2.05) {
-          picks.push({
-            market: 'Goles Under',
-            selection: 'Menos de 2.5 Goles (Under 2.5)',
-            stake: 7,
-            reason: `Tendencia cerrada: ${avgTotalGoals} goles por partido en L7.`
-          });
-        } else {
-          const fav = (statsH.wins - statsH.losses) >= (statsA.wins - statsA.losses) ? `1X (${homeName} o Empate)` : `X2 (${awayName} o Empate)`;
-          picks.push({
-            market: 'Doble Oportunidad',
-            selection: fav,
-            stake: 6,
-            reason: `Balance L7: ${homeName} (${statsH.wins}V-${statsH.draws}E-${statsH.losses}D) vs ${awayName} (${statsA.wins}V-${statsA.draws}E-${statsA.losses}D).`
-          });
-        }
-
-        // 2. Mercado Córners (si hay datos reales)
-        if (avgCorners !== 'N/D') {
-          const cornerPick = parseFloat(avgCorners) >= 9.5 ? 'Más de 8.5 Córners (Over 8.5)' : 'Menos de 10.5 Córners (Under 10.5)';
-          picks.push({
-            market: 'Córners O/U',
-            selection: cornerPick,
-            stake: parseFloat(avgCorners) >= 10.5 || parseFloat(avgCorners) <= 7.5 ? 7 : 6,
-            reason: `Promedio real de ${avgCorners} córners totales por encuentro.`
-          });
-        }
-
-        // 3. Mercado Tarjetas (si hay datos reales)
-        if (avgCards !== 'N/D') {
-          const cardPick = parseFloat(avgCards) >= 4.2 ? 'Más de 3.5 Tarjetas (Over 3.5)' : 'Menos de 4.5 Tarjetas (Under 4.5)';
-          picks.push({
-            market: 'Tarjetas O/U',
-            selection: cardPick,
-            stake: 6,
-            reason: `Promedio disciplinario real de ${avgCards} tarjetas por encuentro.`
-          });
-        }
-
-        const matchTitle = `${homeName} vs ${awayName}`;
-        target.innerHTML = `
-          <div class="bg-slate-900/90 border border-emerald-500/30 rounded-lg p-3 space-y-3">
-            <div class="grid grid-cols-4 gap-1.5 text-center bg-slate-950/70 p-2 rounded text-[11px]">
-              <div><span class="text-slate-400 block">Goles L7</span><b class="text-white">${avgTotalGoals}</b></div>
-              <div><span class="text-slate-400 block">BTTS</span><b class="text-white">${bttsRate}%</b></div>
-              <div><span class="text-slate-400 block">Córners</span><b class="text-emerald-400">${avgCorners}</b></div>
-              <div><span class="text-slate-400 block">Tarjetas</span><b class="text-amber-400">${avgCards}</b></div>
-            </div>
-
-            <div class="space-y-2">
-              ${picks.map(p => `
-                <div class="bg-slate-950/60 border border-slate-800 p-2.5 rounded-lg flex flex-wrap justify-between items-center gap-2">
-                  <div class="flex-1">
-                    <div class="flex items-center gap-2">
-                      <span class="text-[10px] uppercase font-bold text-emerald-400">${p.market}</span>
-                      <span class="badge-stake text-white text-[10px] font-bold px-2 py-0.5 rounded">Stake ${p.stake}/10</span>
-                    </div>
-                    <p class="text-xs font-bold text-white mt-0.5">${p.selection}</p>
-                    <p class="text-[11px] text-slate-400">${p.reason}</p>
-                  </div>
-                  <button onclick="addToSlip('${matchTitle.replace(/'/g, "")}', '${p.selection.replace(/'/g, "")}', ${p.stake})" 
-                    class="px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition">
-                    + Añadir
-                  </button>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        `;
-      } catch (e) {
-        target.innerHTML = `<p class="text-xs text-red-400">Error analizando L7: ${e.message}</p>`;
-      }
-    }
-
-    function calcFootballMetrics(games, teamId) {
-      let wins = 0, draws = 0, losses = 0, goalsFor = 0, goalsAgainst = 0, bttsCount = 0;
-      games.forEach(g => {
-        const isHome = g.teams.home.id === teamId;
-        const gf = isHome ? (g.goals.home || 0) : (g.goals.away || 0);
-        const ga = isHome ? (g.goals.away || 0) : (g.goals.home || 0);
-        goalsFor += gf;
-        goalsAgainst += ga;
-        if (gf > 0 && ga > 0) bttsCount++;
-        if (gf > ga) wins++;
-        else if (gf === ga) draws++;
-        else losses++;
-      });
-      const count = games.length || 1;
-      return { wins, draws, losses, goalsFor: goalsFor / count, goalsAgainst: goalsAgainst / count, bttsCount };
-    }
-
-    // 2. BALONCESTO GENERAL L7
-    async function analyzeBasketballL7(gameId, homeId, awayId, season, homeName, awayName) {
-      const apiKey = localStorage.getItem('apisports_key');
-      const target = document.getElementById(`analysis-${gameId}`);
-      target.innerHTML = `<p class="text-xs text-amber-400 text-center py-2 animate-pulse">⏳ Consultando últimos 7 juegos de ${homeName} y ${awayName}...</p>`;
-
-      try {
-        const [resH, resA] = await Promise.all([
-          fetch(`https://v1.basketball.api-sports.io/games?team=${homeId}&season=${season}`, {
-            headers: { 'x-rapidapi-key': apiKey, 'x-rapidapi-host': 'v1.basketball.api-sports.io' }
-          }),
-          fetch(`https://v1.basketball.api-sports.io/games?team=${awayId}&season=${season}`, {
-            headers: { 'x-rapidapi-key': apiKey, 'x-rapidapi-host': 'v1.basketball.api-sports.io' }
-          })
-        ]);
-
-        const dataH = await resH.json();
-        const dataA = await resA.json();
-
-        const gamesH = (dataH.response || []).filter(g => g.status.short === 'FT').slice(-7);
-        const gamesA = (dataA.response || []).filter(g => g.status.short === 'FT').slice(-7);
-
-        if (gamesH.length === 0 && gamesA.length === 0) {
-          target.innerHTML = `<div class="bg-slate-900/90 border border-amber-500/30 rounded-lg p-3 text-center text-xs text-amber-300">⚠️ Datos históricos L7 insuficientes para este partido.</div>`;
-          return;
-        }
-
-        const statsH = calcBasketMetrics(gamesH, homeId);
-        const statsA = calcBasketMetrics(gamesA, awayId);
-
-        const projectedTotal = Math.round((statsH.ptsFor + statsH.ptsAgainst + statsA.ptsFor + statsA.ptsAgainst) / 2);
-        const diff = (statsH.ptsFor - statsH.ptsAgainst) - (statsA.ptsFor - statsA.ptsAgainst);
-
-        const picks = [
-          {
-            market: 'Total Puntos O/U',
-            selection: `Más de ${(projectedTotal - 5.5).toFixed(1)} Puntos`,
-            stake: 7,
-            reason: `Proyección L7 combinada de ${projectedTotal} pts (${homeName} ${statsH.ptsFor.toFixed(1)} + ${awayName} ${statsA.ptsFor.toFixed(1)}).`
-          }
-        ];
-
-        if (Math.abs(diff) >= 6) {
-          const fav = diff > 0 ? homeName : awayName;
-          picks.push({
-            market: 'Hándicap Asiático',
-            selection: `${fav} -3.5 Pts`,
-            stake: 8,
-            reason: `Ventaja neta L7 de ${Math.abs(diff).toFixed(1)} puntos por partido a favor de ${fav}.`
-          });
-        }
-
-        const matchTitle = `${homeName} vs ${awayName}`;
-        target.innerHTML = `
-          <div class="bg-slate-900/90 border border-amber-500/30 rounded-lg p-3 space-y-2.5">
-            ${picks.map(p => `
-              <div class="bg-slate-950/60 border border-slate-800 p-2.5 rounded-lg flex flex-wrap justify-between items-center gap-2">
-                <div class="flex-1">
-                  <span class="text-[10px] uppercase font-bold text-amber-400">${p.market} • Stake ${p.stake}/10</span>
-                  <p class="text-xs font-bold text-white">${p.selection}</p>
-                  <p class="text-[11px] text-slate-400">${p.reason}</p>
-                </div>
-                <button onclick="addToSlip('${matchTitle.replace(/'/g, "")}', '${p.selection.replace(/'/g, "")}', ${p.stake})" 
-                  class="px-3 py-1.5 rounded bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition">
-                  + Añadir
-                </button>
-              </div>
-            `).join('')}
-          </div>
-        `;
-      } catch (e) {
-        target.innerHTML = `<p class="text-xs text-red-400">Error: ${e.message}</p>`;
-      }
-    }
-
-    function calcBasketMetrics(games, teamId) {
-      let ptsFor = 0, ptsAgainst = 0, wins = 0;
-      games.forEach(g => {
-        const isHome = g.teams.home.id === teamId;
-        const pf = isHome ? (g.scores.home.points || 0) : (g.scores.away.points || 0);
-        const pa = isHome ? (g.scores.away.points || 0) : (g.scores.home.points || 0);
-        ptsFor += pf;
-        ptsAgainst += pa;
-        if (pf > pa) wins++;
-      });
-      const count = games.length || 1;
-      return { ptsFor: ptsFor / count, ptsAgainst: ptsAgainst / count, wins };
-    }
-
-    // 3. NBA L7 + BOXSCORE PLAYER PROPS (Puntos, Rebotes, Asistencias, Triples, Turnovers)
-    async function analyzeNbaL7(gameId, homeId, awayId, season, homeName, awayName) {
-      const apiKey = localStorage.getItem('apisports_key');
-      const target = document.getElementById(`analysis-${gameId}`);
-      target.innerHTML = `<p class="text-xs text-orange-400 text-center py-2 animate-pulse">⏳ Analizando últimos 7 juegos NBA + Boxscores de jugadores...</p>`;
-
-      try {
-        const [resH, resA] = await Promise.all([
-          fetch(`https://v2.nba.api-sports.io/games?team=${homeId}&season=${season}`, {
-            headers: { 'x-rapidapi-key': apiKey, 'x-rapidapi-host': 'v2.nba.api-sports.io' }
-          }),
-          fetch(`https://v2.nba.api-sports.io/games?team=${awayId}&season=${season}`, {
-            headers: { 'x-rapidapi-key': apiKey, 'x-rapidapi-host': 'v2.nba.api-sports.io' }
-          })
-        ]);
-
-        const dataH = await resH.json();
-        const dataA = await resA.json();
-
-        const gamesH = (dataH.response || []).filter(g => g.status.long === 'Finished').slice(-7);
-        const gamesA = (dataA.response || []).filter(g => g.status.long === 'Finished').slice(-7);
-
-        if (gamesH.length === 0 && gamesA.length === 0) {
-          target.innerHTML = `<div class="bg-slate-900/90 border border-orange-500/30 rounded-lg p-3 text-center text-xs text-orange-300">⚠️ Aún no hay juegos finalizados en esta temporada NBA para calcular L7.</div>`;
-          return;
-        }
-
-        // Calcular métricas de equipo L7
-        const calcNbaTeam = (games, tId) => {
-          let pf = 0, pa = 0;
-          games.forEach(g => {
-            const isH = g.teams.home.id === tId;
-            pf += isH ? (g.scores.home.points || 0) : (g.scores.visitors.points || 0);
-            pa += isH ? (g.scores.visitors.points || 0) : (g.scores.home.points || 0);
-          });
-          const c = games.length || 1;
-          return { pf: pf / c, pa: pa / c };
-        };
-
-        const stH = calcNbaTeam(gamesH, homeId);
-        const stA = calcNbaTeam(gamesA, awayId);
-        const projTotal = Math.round((stH.pf + stH.pa + stA.pf + stA.pa) / 2);
-
-        // Consultar estadísticas individuales de jugadores de los 2 juegos más recientes de cada equipo
-        const recentGameIds = [
-          ...(gamesH.slice(-2).map(g => g.id)),
-          ...(gamesA.slice(-2).map(g => g.id))
-        ];
-
-        const playerMap = {};
-        for (const gId of recentGameIds) {
-          const pRes = await fetch(`https://v2.nba.api-sports.io/players/statistics?game=${gId}`, {
-            headers: { 'x-rapidapi-key': apiKey, 'x-rapidapi-host': 'v2.nba.api-sports.io' }
-          });
-          const pData = await pRes.json();
-          (pData.response || []).forEach(stat => {
-            if (stat.team.id !== homeId && stat.team.id !== awayId) return;
-            const pId = stat.player.id;
-            const pName = `${stat.player.firstname} ${stat.player.lastname}`;
-            if (!playerMap[pId]) {
-              playerMap[pId] = { name: pName, team: stat.team.name, games: 0, pts: 0, reb: 0, ast: 0, tpm: 0, to: 0 };
-            }
-            playerMap[pId].games += 1;
-            playerMap[pId].pts += Number(stat.points || 0);
-            playerMap[pId].reb += Number(stat.totReb || 0);
-            playerMap[pId].ast += Number(stat.assists || 0);
-            playerMap[pId].tpm += Number(stat.tpm || 0);
-            playerMap[pId].to += Number(stat.turnovers || 0);
-          });
-        }
-
-        // Seleccionar los 3 jugadores con mayor impacto estadístico
-        const topPlayers = Object.values(playerMap)
-          .filter(p => p.games >= 1)
-          .map(p => ({
-            ...p,
-            avgPts: (p.pts / p.games).toFixed(1),
-            avgReb: (p.reb / p.games).toFixed(1),
-            avgAst: (p.ast / p.games).toFixed(1),
-            avgTpm: (p.tpm / p.games).toFixed(1),
-            avgTo: (p.to / p.games).toFixed(1)
-          }))
-          .sort((a, b) => parseFloat(b.avgPts) - parseFloat(a.avgPts))
-          .slice(0, 4);
-
-        const matchTitle = `${homeName} vs ${awayName}`;
-        const teamPick = `Over ${(projTotal - 4.5).toFixed(1)} Puntos Totales`;
-
-        target.innerHTML = `
-          <div class="bg-slate-900/90 border border-orange-500/30 rounded-lg p-3 space-y-3">
-            <!-- Pick de Equipo -->
-            <div class="bg-slate-950/70 border border-slate-800 p-2.5 rounded-lg flex flex-wrap justify-between items-center gap-2">
-              <div>
-                <span class="text-[10px] uppercase font-bold text-orange-400">NBA Total Puntos • Stake 7/10</span>
-                <p class="text-xs font-bold text-white">${teamPick}</p>
-                <p class="text-[11px] text-slate-400">Proyección L7: ${projTotal} pts combinados.</p>
-              </div>
-              <button onclick="addToSlip('${matchTitle.replace(/'/g, "")}', '${teamPick}', 7)" 
-                class="px-3 py-1.5 rounded bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold transition">
-                + Añadir
-              </button>
-            </div>
-
-            <!-- Player Props Reales -->
-            <div class="space-y-1.5">
-              <p class="text-[11px] font-bold text-slate-300 uppercase tracking-wider">🔥 Player Props Sugeridos (Promedios Reales)</p>
-              ${topPlayers.length === 0 ? '<p class="text-xs text-slate-500">Sin boxscores recientes disponibles.</p>' : topPlayers.map(pl => {
-                // Elegir la mejor prop del jugador
-                let propText = `${pl.name}: Over ${(Math.max(10, parseFloat(pl.avgPts) - 2.5)).toFixed(1)} Puntos`;
-                if (parseFloat(pl.avgReb) >= 9.5) propText = `${pl.name}: Over ${(parseFloat(pl.avgReb) - 1.5).toFixed(1)} Rebotes`;
-                else if (parseFloat(pl.avgAst) >= 7.5) propText = `${pl.name}: Over ${(parseFloat(pl.avgAst) - 1.5).toFixed(1)} Asistencias`;
-                else if (parseFloat(pl.avgTpm) >= 3.0) propText = `${pl.name}: Over ${(parseFloat(pl.avgTpm) - 0.5).toFixed(1)} Triples`;
-
-                return `
-                  <div class="bg-slate-950/60 border border-slate-800/80 p-2 rounded flex flex-wrap justify-between items-center gap-2">
-                    <div>
-                      <p class="text-xs font-bold text-white">${propText} <span class="text-[10px] text-emerald-400 font-normal">(Stake 7/10)</span></p>
-                      <p class="text-[10px] text-slate-400">Promedios: ${pl.avgPts} PTS | ${pl.avgReb} REB | ${pl.avgAst} AST | ${pl.avgTpm} 3PM | ${pl.avgTo} TO</p>
-                    </div>
-                    <button onclick="addToSlip('${matchTitle.replace(/'/g, "")}', '${propText.replace(/'/g, "")}', 7)" 
-                      class="px-2.5 py-1 rounded bg-slate-800 hover:bg-orange-600 text-white text-[11px] font-semibold transition">
-                      + Prop
-                    </button>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          </div>
-        `;
-      } catch (e) {
-        target.innerHTML = `<p class="text-xs text-red-400">Error analizando NBA: ${e.message}</p>`;
-      }
-    }
-
-    // Gestión de Hoja de Picks
-    function addToSlip(match, selection, stake) {
-      slip.push({ match, selection, stake });
-      renderSlip();
-    }
-
-    function removeFromSlip(idx) {
-      slip.splice(idx, 1);
-      renderSlip();
-    }
-
-    function clearSlip() {
-      slip = [];
-      renderSlip();
-    }
-
-    function renderSlip() {
-      const container = document.getElementById('slipItems');
-      const countEl = document.getElementById('slipCount');
-      const avgStakeEl = document.getElementById('avgStake');
-      const recAmountEl = document.getElementById('recommendedAmount');
-      const bankroll = parseFloat(document.getElementById('bankrollInput').value) || 0;
-
-      countEl.textContent = slip.length;
-
-      if (slip.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-500 text-center py-6">Aún no has agregado picks. Analiza un partido y selecciona cualquiera de los mercados sugeridos.</p>`;
-        avgStakeEl.textContent = '- / 10';
-        recAmountEl.textContent = '$0.00';
-        return;
-      }
-
-      const totalStake = slip.reduce((acc, item) => acc + item.stake, 0);
-      const avg = (totalStake / slip.length).toFixed(1);
-      const effectivePct = slip.length === 1 ? avg : (avg * 0.5);
-      const amount = (bankroll * (effectivePct / 100)).toFixed(2);
-
-      avgStakeEl.textContent = `${avg} / 10`;
-      recAmountEl.textContent = `$${amount}`;
-
-      container.innerHTML = slip.map((item, i) => `
-        <div class="bg-slate-900 border border-slate-800 p-2.5 rounded-lg flex justify-between items-start gap-2">
-          <div>
-            <p class="text-[11px] text-slate-400">${item.match}</p>
-            <p class="text-xs font-bold text-white">${item.selection}</p>
-            <span class="text-[10px] text-emerald-400 font-semibold">Stake ${item.stake}/10</span>
-          </div>
-          <button onclick="removeFromSlip(${i})" class="text-slate-500 hover:text-red-400 text-xs">✕</button>
-        </div>
-      `).join('');
-    }
-  </script>
-</body>
-</html>
+          [resH, resA] =
